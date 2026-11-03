@@ -27,7 +27,7 @@ public class FraudEvaluator {
             score += HIGH_AMOUNT_SCORE;
         }
         if (transaction.getCountry() != null
-                && HIGH_RISK_COUNTRIES.contains(transaction.getCountry().toUpperCase())) {
+                && HIGH_RISK_COUNTRIES.contains(transaction.getCountry().toUpperCase(java.util.Locale.ROOT))) {
             score += HIGH_RISK_COUNTRY_SCORE;
         }
         return score;
