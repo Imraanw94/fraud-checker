@@ -33,7 +33,7 @@ public class TransactionService {
         Transaction transaction = new Transaction();
         transaction.setAccountId(request.accountId());
         transaction.setAmount(request.amount());
-        transaction.setCurrency(request.currency().toUpperCase());
+        transaction.setCurrency(request.currency().toUpperCase(java.util.Locale.ROOT));
         transaction.setMerchant(request.merchant());
         transaction.setCountry(request.country());
         transactionRepository.save(transaction);
