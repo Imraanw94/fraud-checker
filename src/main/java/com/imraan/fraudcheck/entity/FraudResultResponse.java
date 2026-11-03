@@ -1,14 +1,17 @@
 package com.imraan.fraudcheck.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.time.Instant;
 import java.util.UUID;
 
+@Schema(description = "Outcome of the fraud evaluation of a transaction")
 public record FraudResultResponse(
-        UUID id,
-        UUID transactionId,
-        FraudDecision decision,
-        int riskScore,
-        Instant evaluatedAt) {
+        @Schema(description = "Fraud result identifier") UUID id,
+        @Schema(description = "Identifier of the evaluated transaction") UUID transactionId,
+        @Schema(description = "Decision reached by the fraud rules") FraudDecision decision,
+        @Schema(description = "Aggregated risk score", example = "40") int riskScore,
+        @Schema(description = "When the evaluation happened") Instant evaluatedAt) {
 
     public static FraudResultResponse from(FraudResult result) {
         return new FraudResultResponse(
