@@ -1,0 +1,9 @@
+target/
+${project.build.directory}/
+.git/
+.github/
+.idea/
+.vscode/
+dev-utils/
+*.iml
+.env
