@@ -69,6 +69,12 @@ The service uses PostgreSQL. Docker Compose provides PostgreSQL 15.3 with a pers
 
 Flyway migrations are stored in `src/main/resources/db/migration` and run automatically at application startup. Hibernate validates the schema against the mapped entities.
 
+## Fraud rules configuration
+
+Rules and decision thresholds are configured under `fraud.*` in `application.yml` (not stored in the database). Each rule has a `code`, `type` (`HIGH_AMOUNT` or `HIGH_RISK_COUNTRY`), `enabled`, `risk-weight`, and `amount-threshold` or `countries` depending on its type. A score at or above `fraud.review-threshold` gives `REVIEW`; at or above `fraud.reject-threshold` gives `REJECTED`.
+
+Override any value with environment variables (for example `FRAUD_REVIEWTHRESHOLD=30` or `FRAUD_RULES_0_RISKWEIGHT=60`) or by mounting a config file such as a Kubernetes ConfigMap.
+
 ## API documentation
 
 With the service running, open:
