@@ -1,11 +1,6 @@
 package com.imraan.fraudcheck.control;
 
-import com.imraan.fraudcheck.entity.FraudResult;
-import com.imraan.fraudcheck.entity.FraudResultRepository;
-import com.imraan.fraudcheck.entity.FraudResultResponse;
-import com.imraan.fraudcheck.entity.Transaction;
-import com.imraan.fraudcheck.entity.TransactionRepository;
-import com.imraan.fraudcheck.entity.TransactionRequest;
+import com.imraan.fraudcheck.entity.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,7 +33,7 @@ public class TransactionService {
         transaction.setCountry(request.country());
         transactionRepository.save(transaction);
 
-        FraudEvaluator.Evaluation evaluation = fraudEvaluator.evaluate(transaction);
+        Evaluation evaluation = fraudEvaluator.evaluate(transaction);
         FraudResult result = new FraudResult();
         result.setTransaction(transaction);
         result.setRiskScore(evaluation.score());
