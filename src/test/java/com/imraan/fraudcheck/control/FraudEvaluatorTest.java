@@ -1,5 +1,6 @@
 package com.imraan.fraudcheck.control;
 
+import com.imraan.fraudcheck.entity.Evaluation;
 import com.imraan.fraudcheck.entity.FraudDecision;
 import com.imraan.fraudcheck.entity.FraudRulesProperties;
 import com.imraan.fraudcheck.entity.FraudRulesProperties.Rule;
@@ -28,7 +29,7 @@ class FraudEvaluatorTest {
 
     @Test
     void lowRiskTransactionIsApproved() {
-        FraudEvaluator.Evaluation e = evaluator.evaluate(tx("100", "ZA"));
+        Evaluation e = evaluator.evaluate(tx("100", "ZA"));
         assertEquals(0, e.score());
         assertEquals(Set.of(), e.triggeredRules());
         assertEquals(FraudDecision.APPROVED, evaluator.decide(e.score()));
@@ -36,7 +37,7 @@ class FraudEvaluatorTest {
 
     @Test
     void highAmountIsReview() {
-        FraudEvaluator.Evaluation e = evaluator.evaluate(tx("10000", "ZA"));
+        Evaluation e = evaluator.evaluate(tx("10000", "ZA"));
         assertEquals(50, e.score());
         assertEquals(Set.of("HIGH_AMOUNT"), e.triggeredRules());
         assertEquals(FraudDecision.REVIEW, evaluator.decide(e.score()));
@@ -44,7 +45,7 @@ class FraudEvaluatorTest {
 
     @Test
     void highAmountAndHighRiskCountryIsRejected() {
-        FraudEvaluator.Evaluation e = evaluator.evaluate(tx("20000", "US"));
+        Evaluation e = evaluator.evaluate(tx("20000", "US"));
         assertEquals(90, e.score());
         assertEquals(Set.of("HIGH_AMOUNT", "HIGH_RISK_COUNTRY"), e.triggeredRules());
         assertEquals(FraudDecision.REJECTED, evaluator.decide(e.score()));
