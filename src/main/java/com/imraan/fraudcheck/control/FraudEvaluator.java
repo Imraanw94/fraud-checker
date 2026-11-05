@@ -1,5 +1,6 @@
 package com.imraan.fraudcheck.control;
 
+import com.imraan.fraudcheck.entity.Evaluation;
 import com.imraan.fraudcheck.entity.FraudDecision;
 import com.imraan.fraudcheck.entity.FraudRulesProperties;
 import com.imraan.fraudcheck.entity.FraudRulesProperties.Rule;
@@ -19,9 +20,6 @@ import java.util.Set;
  */
 @Component
 public class FraudEvaluator {
-
-    public record Evaluation(int score, Set<String> triggeredRules) {
-    }
 
     private final FraudRulesProperties properties;
     private final Map<String, BigDecimal> highAmountThresholds = new HashMap<>();
