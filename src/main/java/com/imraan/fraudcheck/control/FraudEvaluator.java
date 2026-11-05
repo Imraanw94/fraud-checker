@@ -1,10 +1,17 @@
 package com.imraan.fraudcheck.control;
 
 import com.imraan.fraudcheck.entity.FraudDecision;
+import com.imraan.fraudcheck.entity.FraudRulesProperties;
+import com.imraan.fraudcheck.entity.FraudRulesProperties.Rule;
+import com.imraan.fraudcheck.entity.FraudRulesProperties.RuleType;
 import com.imraan.fraudcheck.entity.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -13,33 +20,63 @@ import java.util.Set;
 @Component
 public class FraudEvaluator {
 
-    static final BigDecimal HIGH_AMOUNT_THRESHOLD = new BigDecimal("10000");
-    static final int HIGH_AMOUNT_SCORE = 50;
-    static final int HIGH_RISK_COUNTRY_SCORE = 40;
-    static final int REVIEW_THRESHOLD = 40;
-    static final int REJECT_THRESHOLD = 70;
+    public record Evaluation(int score, Set<String> triggeredRules) {
+    }
 
-    private static final Set<String> HIGH_RISK_COUNTRIES = Set.of("IL", "AE", "US");
+    private final FraudRulesProperties properties;
+    private final Map<String, BigDecimal> highAmountThresholds = new HashMap<>();
 
-    public int score(Transaction transaction) {
+    public FraudEvaluator(FraudRulesProperties properties) {
+        this.properties = properties;
+        for (Rule rule : properties.rules()) {
+            if (rule.values().isEmpty()) {
+                throw new IllegalArgumentException("Rule '" + rule.code() + "' requires at least one value");
+            }
+            if (rule.type() == RuleType.HIGH_AMOUNT) {
+                highAmountThresholds.put(rule.code(), parseAmount(rule));
+            }
+        }
+    }
+
+    private static BigDecimal parseAmount(Rule rule) {
+        try {
+            return new BigDecimal(rule.values().getFirst());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Rule '" + rule.code() + "' requires a numeric value", e);
+        }
+    }
+
+    public Evaluation evaluate(Transaction transaction) {
         int score = 0;
-        if (transaction.getAmount().compareTo(HIGH_AMOUNT_THRESHOLD) >= 0) {
-            score += HIGH_AMOUNT_SCORE;
+        Set<String> triggered = new LinkedHashSet<>();
+        for (Rule rule : properties.rules()) {
+            if (rule.enabled() && matches(rule, transaction)) {
+                score += rule.riskWeight();
+                triggered.add(rule.code());
+            }
         }
-        if (transaction.getCountry() != null
-                && HIGH_RISK_COUNTRIES.contains(transaction.getCountry().toUpperCase(java.util.Locale.ROOT))) {
-            score += HIGH_RISK_COUNTRY_SCORE;
-        }
-        return score;
+        return new Evaluation(score, triggered);
     }
 
     public FraudDecision decide(int score) {
-        if (score >= REJECT_THRESHOLD) {
+        if (score >= properties.rejectThreshold()) {
             return FraudDecision.REJECTED;
         }
-        if (score >= REVIEW_THRESHOLD) {
+        if (score >= properties.reviewThreshold()) {
             return FraudDecision.REVIEW;
         }
         return FraudDecision.APPROVED;
+    }
+
+    private boolean matches(Rule rule, Transaction transaction) {
+        return switch (rule.type()) {
+            case HIGH_AMOUNT -> transaction.getAmount().compareTo(highAmountThresholds.get(rule.code())) >= 0;
+            case HIGH_RISK_COUNTRY -> containsIgnoreCase(rule.values(), transaction.getCountry());
+        };
+    }
+
+    private static boolean containsIgnoreCase(List<String> values, String candidate) {
+        return candidate != null
+                && values.stream().anyMatch(v -> v.equalsIgnoreCase(candidate.trim()));
     }
 }

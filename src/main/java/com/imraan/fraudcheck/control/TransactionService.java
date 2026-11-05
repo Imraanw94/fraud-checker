@@ -38,11 +38,12 @@ public class TransactionService {
         transaction.setCountry(request.country());
         transactionRepository.save(transaction);
 
-        int score = fraudEvaluator.score(transaction);
+        FraudEvaluator.Evaluation evaluation = fraudEvaluator.evaluate(transaction);
         FraudResult result = new FraudResult();
         result.setTransaction(transaction);
-        result.setRiskScore(score);
-        result.setDecision(fraudEvaluator.decide(score));
+        result.setRiskScore(evaluation.score());
+        result.setDecision(fraudEvaluator.decide(evaluation.score()));
+        result.setTriggeredRules(evaluation.triggeredRules());
 
         return FraudResultResponse.from(fraudResultRepository.save(result));
     }
