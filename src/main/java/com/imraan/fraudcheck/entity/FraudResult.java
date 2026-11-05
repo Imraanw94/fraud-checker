@@ -1,6 +1,8 @@
 package com.imraan.fraudcheck.entity;
 
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -9,8 +11,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -45,11 +45,11 @@ public class FraudResult {
     @Column(nullable = false)
     private int riskScore;
 
-    @ManyToMany
-    @JoinTable(name = "fraud_result_triggered_rules",
-            joinColumns = @JoinColumn(name = "fraud_result_id"),
-            inverseJoinColumns = @JoinColumn(name = "fraud_rule_id"))
-    private Set<FraudRule> triggeredRules = new HashSet<>();
+    @ElementCollection
+    @CollectionTable(name = "fraud_result_triggered_rules",
+            joinColumns = @JoinColumn(name = "fraud_result_id"))
+    @Column(name = "rule_code", nullable = false)
+    private Set<String> triggeredRules = new HashSet<>();
 
     @Column(nullable = false, updatable = false)
     private Instant evaluatedAt;
