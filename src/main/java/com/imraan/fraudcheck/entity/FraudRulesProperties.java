@@ -19,7 +19,9 @@ public record FraudRulesProperties(
 
     public enum RuleType {
         HIGH_AMOUNT,
-        HIGH_RISK_COUNTRY
+        HIGH_RISK_COUNTRY,
+        BLACKLISTED_MERCHANT,
+        SUPPORTED_CURRENCIES
     }
 
     public record Rule(
