@@ -31,3 +31,11 @@ fraudrules:
       type: HIGH_RISK_COUNTRY
       risk-weight: 50
       values: [IL, AE, US]
+    - code: BLACKLISTED_MERCHANT
+      type: BLACKLISTED_MERCHANT
+      risk-weight: 70
+      values: [ShadyMerchant, SusGuys]
+    - code: SUPPORTED_CURRENCIES
+      type: SUPPORTED_CURRENCIES
+      risk-weight: 70
+      values: [ZAR, EUR]

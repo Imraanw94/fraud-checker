@@ -70,6 +70,8 @@ public class FraudEvaluator {
         return switch (rule.type()) {
             case HIGH_AMOUNT -> transaction.getAmount().compareTo(highAmountThresholds.get(rule.code())) >= 0;
             case HIGH_RISK_COUNTRY -> containsIgnoreCase(rule.values(), transaction.getCountry());
+            case BLACKLISTED_MERCHANT -> containsIgnoreCase(rule.values(), transaction.getMerchant());
+            case SUPPORTED_CURRENCIES -> !containsIgnoreCase(rule.values(), transaction.getCurrency());
         };
     }
 
