@@ -1,4 +1,4 @@
-package com.imraan.fraudcheck.entity;
+package com.imraan.fraudcheck.entity.config;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

@@ -1,8 +1,8 @@
 package com.imraan.fraudcheck.boundary;
 
 import com.imraan.fraudcheck.control.TransactionService;
-import com.imraan.fraudcheck.entity.FraudResultResponse;
-import com.imraan.fraudcheck.entity.TransactionRequest;
+import com.imraan.fraudcheck.entity.dto.FraudResultResponse;
+import com.imraan.fraudcheck.entity.dto.TransactionRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

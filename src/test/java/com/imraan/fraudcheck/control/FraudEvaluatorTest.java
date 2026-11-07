@@ -2,9 +2,9 @@ package com.imraan.fraudcheck.control;
 
 import com.imraan.fraudcheck.entity.Evaluation;
 import com.imraan.fraudcheck.entity.FraudDecision;
-import com.imraan.fraudcheck.entity.FraudRulesProperties;
-import com.imraan.fraudcheck.entity.FraudRulesProperties.Rule;
-import com.imraan.fraudcheck.entity.FraudRulesProperties.RuleType;
+import com.imraan.fraudcheck.entity.config.FraudRulesProperties;
+import com.imraan.fraudcheck.entity.config.FraudRulesProperties.Rule;
+import com.imraan.fraudcheck.entity.config.FraudRulesProperties.RuleType;
 import com.imraan.fraudcheck.entity.Transaction;
 import org.junit.jupiter.api.Test;
 

@@ -1,5 +1,7 @@
-package com.imraan.fraudcheck.entity;
+package com.imraan.fraudcheck.entity.dto;
 
+import com.imraan.fraudcheck.entity.FraudDecision;
+import com.imraan.fraudcheck.entity.FraudResult;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.Instant;
