@@ -1,5 +1,6 @@
-package com.imraan.fraudcheck.entity;
+package com.imraan.fraudcheck.entity.repository;
 
+import com.imraan.fraudcheck.entity.FraudResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

@@ -1,6 +1,10 @@
 package com.imraan.fraudcheck.control;
 
 import com.imraan.fraudcheck.entity.*;
+import com.imraan.fraudcheck.entity.dto.FraudResultResponse;
+import com.imraan.fraudcheck.entity.dto.TransactionRequest;
+import com.imraan.fraudcheck.entity.repository.FraudResultRepository;
+import com.imraan.fraudcheck.entity.repository.TransactionRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
