@@ -33,7 +33,9 @@ public class TransactionController {
     @Operation(summary = "Submit a transaction",
             description = "Persists the transaction, evaluates it against the fraud rules and returns the fraud result.")
     @ApiResponse(responseCode = "201", description = "Transaction evaluated")
-    @ApiResponse(responseCode = "400", description = "Invalid request body", content = @Content)
+    @ApiResponse(responseCode = "400",
+            description = "Validation failed or malformed body; no transaction is processed",
+            content = @Content)
     @PostMapping
     public ResponseEntity<FraudResultResponse> submit(@Valid @RequestBody TransactionRequest request) {
         FraudResultResponse response = transactionService.submit(request);
@@ -44,6 +46,7 @@ public class TransactionController {
     @Operation(summary = "Get fraud result",
             description = "Retrieves the fraud evaluation result for a previously submitted transaction.")
     @ApiResponse(responseCode = "200", description = "Fraud result found")
+    @ApiResponse(responseCode = "400", description = "Transaction id is not a valid UUID", content = @Content)
     @ApiResponse(responseCode = "404", description = "No result for this transaction", content = @Content)
     @GetMapping("/{id}/fraud-result")
     public FraudResultResponse getFraudResult(@PathVariable UUID id) {
