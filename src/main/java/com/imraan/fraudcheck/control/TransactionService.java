@@ -5,10 +5,8 @@ import com.imraan.fraudcheck.entity.dto.FraudResultResponse;
 import com.imraan.fraudcheck.entity.dto.TransactionRequest;
 import com.imraan.fraudcheck.entity.repository.FraudResultRepository;
 import com.imraan.fraudcheck.entity.repository.TransactionRepository;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -51,7 +49,7 @@ public class TransactionService {
     public FraudResultResponse getResult(UUID transactionId) {
         return fraudResultRepository.findByTransactionId(transactionId)
                 .map(FraudResultResponse::from)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "No fraud result for transaction " + transactionId));
     }
 }
