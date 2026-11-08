@@ -49,7 +49,7 @@ public class TransactionService {
     public FraudResultResponse getResult(UUID transactionId) {
         return fraudResultRepository.findByTransactionId(transactionId)
                 .map(FraudResultResponse::from)
-                .orElseThrow(() ->                 new ResourceNotFoundException(
+                .orElseThrow(() -> new ResourceNotFoundException(
                         "No fraud result for transaction " + transactionId));
     }
 }
