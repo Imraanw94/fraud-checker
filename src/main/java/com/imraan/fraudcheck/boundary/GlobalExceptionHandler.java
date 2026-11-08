@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({ResourceNotFoundException.class, NoResourceFoundException.class})
     public ResponseEntity<ApiError> handleNotFound(Exception ex) {
         String message = ex instanceof ResourceNotFoundException ? ex.getMessage() : "Resource not found";
+        log.warn("Resource not found: {}", ex.getMessage());
         return error(HttpStatus.NOT_FOUND, message, List.of());
     }
 
@@ -42,21 +43,25 @@ public class GlobalExceptionHandler {
                 .map(e -> new FieldViolation(e.getField(), e.getDefaultMessage()))
                 .sorted(Comparator.comparing(FieldViolation::field).thenComparing(FieldViolation::message))
                 .toList();
+        log.warn("Request validation failed: violations={}", violations);
         return badRequest("Validation failed", violations);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiError> handleUnreadable(HttpMessageNotReadableException ex) {
+        log.warn("Malformed or unreadable request body: {}", ex.getMostSpecificCause().getMessage());
         return badRequest("Malformed or unreadable request body", List.of());
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiError> handleMethodNotSupported(HttpRequestMethodNotSupportedException ex) {
+        log.warn("Method not supported: method={}", ex.getMethod());
         return error(HttpStatus.METHOD_NOT_ALLOWED, "Method '" + ex.getMethod() + "' is not supported", List.of());
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiError> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        log.warn("Invalid request parameter: name={} value={}", ex.getName(), ex.getValue());
         return badRequest("Invalid value for parameter '" + ex.getName() + "'",
                 List.of(new FieldViolation(ex.getName(), "invalid value")));
     }

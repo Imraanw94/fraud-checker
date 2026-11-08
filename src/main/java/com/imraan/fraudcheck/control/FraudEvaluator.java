@@ -6,6 +6,8 @@ import com.imraan.fraudcheck.entity.config.FraudRulesProperties;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties.Rule;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties.RuleType;
 import com.imraan.fraudcheck.entity.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -20,6 +22,8 @@ import java.util.Set;
  */
 @Component
 public class FraudEvaluator {
+
+    private static final Logger log = LoggerFactory.getLogger(FraudEvaluator.class);
 
     private final FraudRulesProperties properties;
     private final Map<String, BigDecimal> highAmountThresholds = new HashMap<>();
@@ -51,8 +55,12 @@ public class FraudEvaluator {
             if (rule.enabled() && matches(rule, transaction)) {
                 score += rule.riskWeight();
                 triggered.add(rule.code());
+                log.debug("Fraud rule triggered: transactionId={} rule={} weight={}",
+                        transaction.getId(), rule.code(), rule.riskWeight());
             }
         }
+        log.debug("Fraud rules evaluated: transactionId={} score={} triggeredRules={}",
+                transaction.getId(), score, triggered);
         return new Evaluation(score, triggered);
     }
 
