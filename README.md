@@ -47,6 +47,16 @@ Run the application:
 
 The service listens on http://localhost:8080. Flyway creates and updates the schema on startup. Stop the local database with `docker compose down`; add `-v` to also delete its persisted data.
 
+## Running tests
+
+Integration tests use [Testcontainers](https://testcontainers.com/) to start a throwaway PostgreSQL 15.3 container. The datasource is configured automatically (`@ServiceConnection`), Flyway migrations run against it, and the container is stopped when the tests finish. No locally installed PostgreSQL and no `DB_*` variables are needed; only a running Docker daemon is required.
+
+```bash
+./mvnw clean verify
+```
+
+Unit tests that do not touch the database run without Docker. The first run pulls the `postgres:15.3` image. Shared container setup lives in `src/test/java/com/imraan/fraudcheck/TestcontainersConfiguration.java`; import it into any `@SpringBootTest` with `@Import(TestcontainersConfiguration.class)`.
+
 ## Run with Docker Compose
 
 Docker Compose builds the application image, starts PostgreSQL, waits for the database health check, and then starts the application. The defaults are defined in `docker-compose.yml`.
