@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,6 +26,8 @@ import java.util.UUID;
 @RequestMapping("/api/transactions")
 public class TransactionController {
 
+    private static final Logger log = LoggerFactory.getLogger(TransactionController.class);
+
     private final TransactionService transactionService;
 
     public TransactionController(TransactionService transactionService) {
@@ -38,6 +42,8 @@ public class TransactionController {
             content = @Content)
     @PostMapping
     public ResponseEntity<FraudResultResponse> submit(@Valid @RequestBody TransactionRequest request) {
+        log.info("Received transaction submission request: method=POST path=/api/transactions accountId={} amount={} currency={} country={}",
+                request.accountId(), request.amount(), request.currency(), request.country());
         FraudResultResponse response = transactionService.submit(request);
         URI location = URI.create("/api/transactions/" + response.transactionId() + "/fraud-result");
         return ResponseEntity.created(location).body(response);
@@ -50,6 +56,7 @@ public class TransactionController {
     @ApiResponse(responseCode = "404", description = "No result for this transaction", content = @Content)
     @GetMapping("/{id}/fraud-result")
     public FraudResultResponse getFraudResult(@PathVariable UUID id) {
+        log.info("Received fraud result request: method=GET path=/api/transactions/{}/fraud-result transactionId={}", id, id);
         return transactionService.getResult(id);
     }
 }
