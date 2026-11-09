@@ -79,6 +79,33 @@ The service uses PostgreSQL. Docker Compose provides PostgreSQL 15.3 with a pers
 
 Flyway migrations are stored in `src/main/resources/db/migration` and run automatically at application startup. Hibernate validates the schema against the mapped entities.
 
+## Security
+
+All `/api/**` endpoints require HTTP Basic authentication. Missing or invalid credentials return `401 Unauthorized`. The following remain public (GET only): `/actuator/health`, `/v3/api-docs` and `/swagger-ui.html` (Swagger UI). Any other path is denied.
+
+Credentials are externalized in `application.yml` (`security.api.username` / `security.api.password`) and default to `admin` / `password` so the service starts with no setup. These defaults are for local development only; override them with the `API_USERNAME` and `API_PASSWORD` environment variables (or `.env` with Docker Compose) for anything else.
+
+```bash
+export API_USERNAME=admin
+export API_PASSWORD=password
+./mvnw spring-boot:run
+```
+
+To override them with Docker Compose, add them to `.env` (git-ignored):
+
+```
+API_USERNAME=admin
+API_PASSWORD=password
+```
+
+Call a protected endpoint:
+
+```bash
+curl -u admin:password http://localhost:8080/api/transactions/<transactionId>/fraud-result
+```
+
+In Swagger UI, click **Authorize** and enter the username and password to use "Try it out". Use HTTPS in production, since Basic credentials are only base64-encoded.
+
 ## Health monitoring
 
 Spring Boot Actuator provides the health endpoint at `GET /actuator/health`. It is the only exposed actuator endpoint, is permitted without authentication in `SecurityConfig`, and works both locally and through Docker Compose (port 8080).
@@ -116,6 +143,7 @@ Submit a transaction:
 
 ```bash
 curl -i -X POST http://localhost:8080/api/transactions \
+  -u admin:password \
   -H "Content-Type: application/json" \
   -d '{
     "accountId": "ACC-1001",
@@ -143,7 +171,7 @@ The country `US` contributes a risk score of 40, which results in a `REVIEW` dec
 Retrieve the result using the returned `transactionId`:
 
 ```bash
-curl http://localhost:8080/api/transactions/8c803a16-9982-44ad-84ac-d075f7b34756/fraud-result
+curl -u admin:password http://localhost:8080/api/transactions/8c803a16-9982-44ad-84ac-d075f7b34756/fraud-result
 ```
 
 The response has the same shape as the submission response.

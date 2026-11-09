@@ -22,6 +22,8 @@ services:
       DB_URL: jdbc:postgresql://database:5432/${POSTGRES_DB:-fraudcheck}
       DB_USERNAME: ${POSTGRES_USER:-postgres}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      API_USERNAME: ${API_USERNAME:-admin}
+      API_PASSWORD: ${API_PASSWORD:-password}
     ports:
       - "8080:8080"
 
