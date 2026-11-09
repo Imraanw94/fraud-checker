@@ -11,7 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -36,13 +40,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * running in a Testcontainer) through the REST API.
  */
 @SpringBootTest
-@AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 class TransactionApiIntegrationTest {
 
     private static final String TRANSACTIONS = "/api/transactions";
 
     @Autowired
+    private WebApplicationContext context;
+    @Value("${security.api.username}")
+    private String apiUsername;
+    @Value("${security.api.password}")
+    private String apiPassword;
     private MockMvc mockMvc;
     @Autowired
     private TransactionRepository transactionRepository;
@@ -53,6 +61,8 @@ class TransactionApiIntegrationTest {
 
     @BeforeEach
     void cleanDatabase() {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity())
+                .defaultRequest(get("/").with(httpBasic(apiUsername, apiPassword))).build();
         fraudResultRepository.deleteAll();
         transactionRepository.deleteAll();
     }
