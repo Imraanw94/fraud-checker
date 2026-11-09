@@ -79,6 +79,24 @@ The service uses PostgreSQL. Docker Compose provides PostgreSQL 15.3 with a pers
 
 Flyway migrations are stored in `src/main/resources/db/migration` and run automatically at application startup. Hibernate validates the schema against the mapped entities.
 
+## Health monitoring
+
+Spring Boot Actuator provides the health endpoint at `GET /actuator/health`. It is the only exposed actuator endpoint, is permitted without authentication in `SecurityConfig`, and works both locally and through Docker Compose (port 8080).
+
+```bash
+curl -i http://localhost:8080/actuator/health
+```
+
+```json
+{"groups":["liveness","readiness"],"status":"UP"}
+```
+
+- `status` is the overall application status (`UP` or `DOWN`). `UP` returns HTTP 200; `DOWN` returns HTTP 503.
+- `components.db` reports the PostgreSQL connection status. If the database is unreachable, `db` and the overall status become `DOWN`.
+- Component statuses are shown, but details (connection info, disk paths) are hidden.
+
+Configuration lives under `management.*` in `application.yml`.
+
 ## Fraud rules configuration
 
 Rules and decision thresholds are configured under `fraud.*` in `application.yml` (not stored in the database). Each rule has a `code`, `type` (`HIGH_AMOUNT` or `HIGH_RISK_COUNTRY`), `enabled`, `risk-weight`, and `amount-threshold` or `countries` depending on its type. A score at or above `fraud.review-threshold` gives `REVIEW`; at or above `fraud.reject-threshold` gives `REJECTED`.
