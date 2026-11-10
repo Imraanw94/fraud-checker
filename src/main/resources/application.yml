@@ -46,19 +46,15 @@ fraudrules:
   review-threshold: 40
   reject-threshold: 70
   rules:
-    - code: HIGH_AMOUNT
-      type: HIGH_AMOUNT
+    - type: HIGH_AMOUNT
       risk-weight: 20
       values: [10000]
-    - code: HIGH_RISK_COUNTRY
-      type: HIGH_RISK_COUNTRY
+    - type: HIGH_RISK_COUNTRY
       risk-weight: 50
       values: [IL, AE, US]
-    - code: BLACKLISTED_MERCHANT
-      type: BLACKLISTED_MERCHANT
+    - type: BLACKLISTED_MERCHANT
       risk-weight: 70
       values: [ShadyMerchant, SusGuys]
-    - code: SUPPORTED_CURRENCIES
-      type: SUPPORTED_CURRENCIES
+    - type: SUPPORTED_CURRENCIES
       risk-weight: 70
       values: [ZAR, EUR]
