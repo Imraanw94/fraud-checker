@@ -1,5 +1,9 @@
 package com.imraan.fraudcheck.control;
 
+import com.imraan.fraudcheck.control.rule.BlacklistedMerchantRule;
+import com.imraan.fraudcheck.control.rule.HighAmountRule;
+import com.imraan.fraudcheck.control.rule.HighRiskCountryRule;
+import com.imraan.fraudcheck.control.rule.UnsupportedCurrencyRule;
 import com.imraan.fraudcheck.entity.Evaluation;
 import com.imraan.fraudcheck.entity.FraudDecision;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties;
@@ -16,13 +20,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class FraudEvaluatorTest {
 
-    private final FraudEvaluator evaluator = new FraudEvaluator(new FraudRulesProperties(40, 70, List.of(
-            new Rule("HIGH_AMOUNT", RuleType.HIGH_AMOUNT, true, 50, List.of("10000")),
-            new Rule("HIGH_RISK_COUNTRY", RuleType.HIGH_RISK_COUNTRY, true, 40, List.of("IL", "AE", "US")))));
+    private static FraudEvaluator evaluatorFor(FraudRulesProperties properties) {
+        FraudRuleEngine engine = new FraudRuleEngine(properties, List.of(
+                new HighAmountRule(),
+                new HighRiskCountryRule(),
+                new BlacklistedMerchantRule(),
+                new UnsupportedCurrencyRule()));
+        return new FraudEvaluator(properties, engine);
+    }
 
-    private final FraudEvaluator merchantCurrencyEvaluator = new FraudEvaluator(new FraudRulesProperties(40, 70, List.of(
-            new Rule("BLACKLISTED_MERCHANT", RuleType.BLACKLISTED_MERCHANT, true, 60, List.of("Shady Shop", "BadCo")),
-            new Rule("SUPPORTED_CURRENCIES", RuleType.SUPPORTED_CURRENCIES, true, 30, List.of("ZAR", "USD")))));
+    private final FraudEvaluator evaluator = evaluatorFor(new FraudRulesProperties(40, 70, List.of(
+            new Rule(RuleType.HIGH_AMOUNT, true, 50, List.of("10000")),
+            new Rule(RuleType.HIGH_RISK_COUNTRY, true, 40, List.of("IL", "AE", "US")))));
+
+    private final FraudEvaluator merchantCurrencyEvaluator = evaluatorFor(new FraudRulesProperties(40, 70, List.of(
+            new Rule(RuleType.BLACKLISTED_MERCHANT, true, 60, List.of("Shady Shop", "BadCo")),
+            new Rule(RuleType.SUPPORTED_CURRENCIES, true, 30, List.of("ZAR", "USD")))));
 
     private Transaction transaction(String amount, String country, String merchant, String currency) {
         Transaction t = new Transaction();
@@ -35,7 +48,7 @@ class FraudEvaluatorTest {
 
     @Test
     void lowRiskTransactionIsApproved() {
-        Evaluation e = evaluator.evaluate(transaction("100", "ZA", "Good Store", "ZAR"));
+        Evaluation e = evaluator.evaluateTransaction(transaction("100", "ZA", "Good Store", "ZAR"));
         assertEquals(0, e.score());
         assertEquals(Set.of(), e.triggeredRules());
         assertEquals(FraudDecision.APPROVED, evaluator.decide(e.score()));
@@ -43,7 +56,7 @@ class FraudEvaluatorTest {
 
     @Test
     void highAmountIsReview() {
-        Evaluation e = evaluator.evaluate(transaction("10000", "ZA", "Good Store", "ZAR"));
+        Evaluation e = evaluator.evaluateTransaction(transaction("10000", "ZA", "Good Store", "ZAR"));
         assertEquals(50, e.score());
         assertEquals(Set.of("HIGH_AMOUNT"), e.triggeredRules());
         assertEquals(FraudDecision.REVIEW, evaluator.decide(e.score()));
@@ -51,7 +64,7 @@ class FraudEvaluatorTest {
 
     @Test
     void highAmountAndHighRiskCountryIsRejected() {
-        Evaluation e = evaluator.evaluate(transaction("20000", "US", "Good Store", "ZAR"));
+        Evaluation e = evaluator.evaluateTransaction(transaction("20000", "US", "Good Store", "ZAR"));
         assertEquals(90, e.score());
         assertEquals(Set.of("HIGH_AMOUNT", "HIGH_RISK_COUNTRY"), e.triggeredRules());
         assertEquals(FraudDecision.REJECTED, evaluator.decide(e.score()));
@@ -59,45 +72,45 @@ class FraudEvaluatorTest {
 
     @Test
     void disabledRuleIsIgnored() {
-        FraudEvaluator disabled = new FraudEvaluator(new FraudRulesProperties(40, 70, List.of(
-                new Rule("HIGH_AMOUNT", RuleType.HIGH_AMOUNT, false, 50, List.of("10000")))));
-        assertEquals(0, disabled.evaluate(transaction("20000", "ZA", "Good Store", "ZAR")).score());
+        FraudEvaluator disabled = evaluatorFor(new FraudRulesProperties(40, 70, List.of(
+                new Rule(RuleType.HIGH_AMOUNT, false, 50, List.of("10000")))));
+        assertEquals(0, disabled.evaluateTransaction(transaction("20000", "ZA", "Good Store", "ZAR")).score());
     }
 
     @Test
     void blacklistedMerchantIsTriggered() {
-        Evaluation e = merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "Shady Shop", "ZAR"));
+        Evaluation e = merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "Shady Shop", "ZAR"));
         assertEquals(60, e.score());
         assertEquals(Set.of("BLACKLISTED_MERCHANT"), e.triggeredRules());
     }
 
     @Test
     void blacklistedMerchantMatchIgnoresCaseAndWhitespace() {
-        Evaluation e = merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "  shady shop ", "ZAR"));
+        Evaluation e = merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "  shady shop ", "ZAR"));
         assertEquals(Set.of("BLACKLISTED_MERCHANT"), e.triggeredRules());
     }
 
     @Test
     void nonBlacklistedOrNullMerchantIsNotTriggered() {
-        assertEquals(0, merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "Good Store", "ZAR")).score());
-        assertEquals(0, merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", null, "ZAR")).score());
+        assertEquals(0, merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "Good Store", "ZAR")).score());
+        assertEquals(0, merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", null, "ZAR")).score());
     }
 
     @Test
     void supportedCurrencyIsNotTriggered() {
-        assertEquals(0, merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "Good Store", "usd")).score());
+        assertEquals(0, merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "Good Store", "usd")).score());
     }
 
     @Test
     void unsupportedCurrencyIsTriggered() {
-        Evaluation e = merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "Good Store", "EUR"));
+        Evaluation e = merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "Good Store", "EUR"));
         assertEquals(30, e.score());
         assertEquals(Set.of("SUPPORTED_CURRENCIES"), e.triggeredRules());
     }
 
     @Test
     void blacklistedMerchantAndUnsupportedCurrencyIsRejected() {
-        Evaluation e = merchantCurrencyEvaluator.evaluate(transaction("1", "ZA", "BadCo", "EUR"));
+        Evaluation e = merchantCurrencyEvaluator.evaluateTransaction(transaction("1", "ZA", "BadCo", "EUR"));
         assertEquals(90, e.score());
         assertEquals(FraudDecision.REJECTED, merchantCurrencyEvaluator.decide(e.score()));
     }

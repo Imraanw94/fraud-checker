@@ -41,7 +41,7 @@ public class TransactionService {
         log.info("Transaction persisted: transactionId={} accountId={} amount={} currency={}",
                 transaction.getId(), transaction.getAccountId(), transaction.getAmount(), transaction.getCurrency());
 
-        Evaluation evaluation = fraudEvaluator.evaluate(transaction);
+        Evaluation evaluation = fraudEvaluator.evaluateTransaction(transaction);
         FraudResult result = new FraudResult();
         result.setTransaction(transaction);
         result.setRiskScore(evaluation.score());
