@@ -25,7 +25,6 @@ public record FraudRulesProperties(
     }
 
     public record Rule(
-            @NotBlank String code,
             @NotNull RuleType type,
             @DefaultValue("true") boolean enabled,
             @Min(0) int riskWeight,
