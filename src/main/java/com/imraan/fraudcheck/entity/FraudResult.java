@@ -1,5 +1,6 @@
 package com.imraan.fraudcheck.entity;
 
+import com.imraan.fraudcheck.entity.enums.FraudDecision;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;

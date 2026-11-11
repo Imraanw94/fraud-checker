@@ -1,7 +1,7 @@
 package com.imraan.fraudcheck.control;
 
 import com.imraan.fraudcheck.entity.Evaluation;
-import com.imraan.fraudcheck.entity.FraudDecision;
+import com.imraan.fraudcheck.entity.enums.FraudDecision;
 import com.imraan.fraudcheck.entity.Transaction;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties;
 import org.springframework.stereotype.Component;

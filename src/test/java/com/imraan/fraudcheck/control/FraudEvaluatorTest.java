@@ -5,7 +5,7 @@ import com.imraan.fraudcheck.control.rule.HighAmountRule;
 import com.imraan.fraudcheck.control.rule.HighRiskCountryRule;
 import com.imraan.fraudcheck.control.rule.UnsupportedCurrencyRule;
 import com.imraan.fraudcheck.entity.Evaluation;
-import com.imraan.fraudcheck.entity.FraudDecision;
+import com.imraan.fraudcheck.entity.enums.FraudDecision;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties.Rule;
 import com.imraan.fraudcheck.entity.config.FraudRulesProperties.RuleType;
