@@ -1,7 +1,7 @@
 package com.imraan.fraudcheck.control;
 
 import com.imraan.fraudcheck.TestcontainersConfiguration;
-import com.imraan.fraudcheck.entity.ResourceNotFoundException;
+import com.imraan.fraudcheck.entity.exceptions.ResourceNotFoundException;
 import com.imraan.fraudcheck.entity.dto.FraudResultResponse;
 import com.imraan.fraudcheck.entity.dto.TransactionRequest;
 import com.imraan.fraudcheck.entity.repository.FraudResultRepository;

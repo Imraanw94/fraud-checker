@@ -3,6 +3,7 @@ package com.imraan.fraudcheck.control;
 import com.imraan.fraudcheck.entity.*;
 import com.imraan.fraudcheck.entity.dto.FraudResultResponse;
 import com.imraan.fraudcheck.entity.dto.TransactionRequest;
+import com.imraan.fraudcheck.entity.exceptions.ResourceNotFoundException;
 import com.imraan.fraudcheck.entity.repository.FraudResultRepository;
 import com.imraan.fraudcheck.entity.repository.TransactionRepository;
 import org.slf4j.Logger;

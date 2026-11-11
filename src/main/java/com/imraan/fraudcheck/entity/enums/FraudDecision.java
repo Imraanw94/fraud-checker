@@ -1,4 +1,4 @@
-package com.imraan.fraudcheck.entity;
+package com.imraan.fraudcheck.entity.enums;
 
 public enum FraudDecision {
     APPROVED,

@@ -2,7 +2,7 @@ package com.imraan.fraudcheck.boundary;
 
 import com.imraan.fraudcheck.entity.dto.ApiError;
 import com.imraan.fraudcheck.entity.dto.ApiError.FieldViolation;
-import com.imraan.fraudcheck.entity.ResourceNotFoundException;
+import com.imraan.fraudcheck.entity.exceptions.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

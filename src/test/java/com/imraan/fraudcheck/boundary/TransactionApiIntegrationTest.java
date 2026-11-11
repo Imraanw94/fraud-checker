@@ -2,7 +2,7 @@ package com.imraan.fraudcheck.boundary;
 
 import com.jayway.jsonpath.JsonPath;
 import com.imraan.fraudcheck.TestcontainersConfiguration;
-import com.imraan.fraudcheck.entity.FraudDecision;
+import com.imraan.fraudcheck.entity.enums.FraudDecision;
 import com.imraan.fraudcheck.entity.FraudResult;
 import com.imraan.fraudcheck.entity.Transaction;
 import com.imraan.fraudcheck.entity.repository.FraudResultRepository;
