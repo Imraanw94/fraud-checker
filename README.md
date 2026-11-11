@@ -120,6 +120,19 @@ The service uses PostgreSQL. Docker Compose provides PostgreSQL 15.3 with a pers
 
 Flyway migrations are stored in `src/main/resources/db/migration` and run automatically at application startup. Hibernate validates the schema against the mapped entities.
 
+## Startup test data
+
+Test data generation is disabled by default. To enable it, set the Spring property
+`test-data.enabled=true`, for example with `TEST_DATA_ENABLED=true`. When enabled,
+the service seeds an empty transaction table with 30 transactions: 10 approved,
+10 in review, and 10 rejected. It skips generation if any transactions already
+exist, so restarting does not add another batch.
+
+The transactions are evaluated through the normal fraud workflow. The sample
+values depend on the default fraud rules; if configured rules produce different
+decisions, startup fails and the batch is rolled back rather than storing an
+incorrect split. Enable this feature only for databases intended for test data.
+
 | Migration | Purpose |
 |-----------|---------|
 | `V1__create_fraud_tables.sql` | Initial schema: transactions, fraud rules, fraud results |
