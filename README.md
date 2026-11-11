@@ -124,7 +124,7 @@ Flyway migrations are stored in `src/main/resources/db/migration` and run automa
 
 Test data generation is disabled by default. To enable it, set the Spring property
 `test-data.enabled=true`, for example with `TEST_DATA_ENABLED=true`. When enabled,
-the service seeds an empty transaction table with 100 transactions: 10 approved,
+the service seeds an empty transaction table with 30 transactions: 10 approved,
 10 in review, and 10 rejected. It skips generation if any transactions already
 exist, so restarting does not add another batch.
 
