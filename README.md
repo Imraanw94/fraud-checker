@@ -59,19 +59,60 @@ Unit tests that do not touch the database run without Docker. The first run pull
 
 ## Run with Docker Compose
 
-Docker Compose builds the application image, starts PostgreSQL, waits for the database health check, and then starts the application. The defaults are defined in `docker-compose.yml`.
+Docker Compose builds the application image, starts PostgreSQL, waits for the database health check, and then starts the application. No setup is needed in a clean checkout: every setting has a default in `docker-compose.yml`, and can be overridden through environment variables or a `.env` file (copy `.env.example`; `.env` is git-ignored).
+
+### Docker image
+
+The `Dockerfile` is a multi-stage build. The first stage (JDK + Maven Wrapper) compiles and packages the jar; the final stage contains only the JRE and the jar, so no build tools or source code ship in the runtime image. The application runs as a non-root user, and the image has a `HEALTHCHECK` on `/actuator/health`.
+
+Build the image on its own:
+
+```bash
+docker build -t fraud-check .
+```
+
+### Start and stop
 
 ```bash
 docker compose up --build -d
+docker compose ps
 ```
 
-View application logs:
+`app` starts only after `database` is healthy (`depends_on: condition: service_healthy`), and `docker compose ps` shows both as `healthy` once startup completes. Verify:
 
 ```bash
-docker compose logs -f app
+curl http://localhost:8080/actuator/health
 ```
 
 Stop the services with `docker compose down`. To also remove the persisted database volume, use `docker compose down -v`.
+
+### Logs
+
+The application logs to stdout/stderr, so standard Docker commands work:
+
+```bash
+docker compose logs -f app
+docker compose logs database
+docker logs <container>
+```
+
+### Configuration
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `POSTGRES_VERSION` | `15.3` | PostgreSQL image tag |
+| `POSTGRES_USER` / `POSTGRES_PASSWORD` / `POSTGRES_DB` | `postgres` / `password` / `fraudcheck` | Database credentials and name (also passed to the app) |
+| `POSTGRES_PORT` | `5432` | Host port for PostgreSQL |
+| `APP_PORT` | `8080` | Host port for the application |
+| `API_USERNAME` / `API_PASSWORD` | `admin` / `password` | API Basic auth credentials |
+| `LOG_LEVEL_ROOT` / `LOG_LEVEL_APP` | `INFO` | Log levels |
+| `JAVA_TOOL_OPTIONS` | `-XX:MaxRAMPercentage=75` | JVM options |
+
+The defaults are for local development only; set real secrets in `.env` for any shared environment.
+
+### Tests
+
+Run the integration tests (Testcontainers, requires a Docker daemon) with `./mvnw clean verify`. They are unaffected by the Docker image; startup inside Docker is verified by the health checks above.
 
 ## Database
 
@@ -79,6 +120,18 @@ The service uses PostgreSQL. Docker Compose provides PostgreSQL 15.3 with a pers
 
 Flyway migrations are stored in `src/main/resources/db/migration` and run automatically at application startup. Hibernate validates the schema against the mapped entities.
 
+| Migration | Purpose |
+|-----------|---------|
+| `V1__create_fraud_tables.sql` | Initial schema: transactions, fraud rules, fraud results |
+| `V2__fraud_rules_from_config.sql` | Rules move to configuration; results store triggered rule codes |
+| `V3__add_search_indexes.sql` | Indexes for transaction and fraud alert search |
+
+Indexes added in V3 (matching the queries in `SearchService`):
+
+- `transactions (account_id, created_at)` replaces the old `account_id` index; `transactions (created_at)`; `transactions (upper(country))` (the country filter is case-insensitive, so the index uses the same expression).
+- `fraud_results (decision, evaluated_at)`, `(evaluated_at)` and `(risk_score)`.
+
+`fraud_results.transaction_id` is already indexed by its unique constraint. Never edit an applied migration; add a new `V<n>__*.sql` file instead.
 ## Security
 
 All `/api/**` endpoints require HTTP Basic authentication. Missing or invalid credentials return `401 Unauthorized`. The following remain public (GET only): `/actuator/health`, `/v3/api-docs` and `/swagger-ui.html` (Swagger UI). Any other path is denied.
